@@ -43,7 +43,6 @@ def findpeaks(y):
                ind = ind[0:-2]   # The plateau at the end is a valley, so remove it from the list
 
     # Get the values that are at the start of plateaus, or are peaks
-    
     ind_v = np.append([0], np.diff(ind))
     ind = np.compress(ind_v != 1, ind)   
 
