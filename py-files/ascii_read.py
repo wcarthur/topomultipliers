@@ -2,56 +2,21 @@
 ## Read input DEM stored in ../input 
 ##------------------------------------------------------
 import numpy
-# -----------------------
-# read input ascii file
-#------------------------
-input_dem = '../input/dem.asc'
 
-fid = open(input_dem,'r')
+class ElevationData(object):
+    
+    def __init__(self, input_dem):
+        
+        with open(input_dem, 'r') as fid:
+            for i in xrange(0, 6):
+                line = fid.readline()
+                contents = line.split()
+                label = contents[0]
+                setattr(self, label, float(contents[1]))
 
-if fid == -1:
-     raise Exception("Cannot find file")
- 
-# Read header information and store in structure
-for i in range(1,7):
-    tline    = fid.readline()
-    data_str = tline.partition(' ')[2]
-#     print data_str
-    if i == 1: 
-       ncols         = int(data_str)
-    elif i == 2:
-        nrows         = int(data_str)
-    elif i == 3:
-        xllcorner     = int(data_str)
-    elif i == 4:  
-        yllcorner     = int(data_str)
-    elif i == 5:
-        cellsize      = float(data_str)
-    elif i == 6:
-        NODATA_value  = int(data_str)
- 
-# Read dataset
-
-A = numpy.zeros([nrows, ncols], dtype=float)
-
-for i in xrange(nrows):
-            row = numpy.zeros([ncols])    
-            line = fid.readline()
- 
-            for j, val in enumerate(line.split(), start = 0):
-                value = int(val)
-                if value == NODATA_value:
-                    value = Nan
-                row[j] = value
-            A[i,:] = row
-fid.close()
-
-A = A.conj().transpose()
-max_data = A.max()
-nan_ind = numpy.isnan(A)
-
-A[nan_ind] = max_data
-NODATA_value = max_data
-
-data = A
+        self.data = numpy.genfromtxt(input_dem, skip_header=6)
+               
+        self.data = self.data.conj().transpose()
+        numpy.putmask(self.data, self.data==self.NODATA_value, numpy.nan)
+        
 

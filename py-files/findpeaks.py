@@ -2,11 +2,11 @@
 ## Generate the indices of the ridges in a data line
 ## --------------------------------------------------------
 
-import numpy
+import numpy as np
 
 def findpeaks(y):
-  
-    dy = numpy.diff(y)
+
+    dy = np.diff(y)
     if y.size == 0:
         ind = []
         return ind
@@ -15,18 +15,18 @@ def findpeaks(y):
         ind = [0]
         return ind
       
-    dy_z = numpy.array(numpy.where(dy == 0))
+    dy_z = np.array(np.where(dy == 0))
     if dy.size == dy_z.size:
         ind = []
         return ind
 
-    dy_a1 = numpy.append(dy, [0])
-    dy_a2 = numpy.append([1], dy)
+    dy_a1 = np.append(dy, [0])
+    dy_a2 = np.append([1], dy)
     
-    ind_a1 = numpy.array((dy_a1 <= 0).nonzero())
-    ind_a2 = numpy.array((dy_a2 > 0).nonzero())
+    ind_a1 = np.array((dy_a1 <= 0).nonzero())
+    ind_a2 = np.array((dy_a2 > 0).nonzero())
     
-    ind = numpy.intersect1d(ind_a1, ind_a2)
+    ind = np.intersect1d(ind_a1, ind_a2)
     
     if ind[0] == 0:
         if dy[0] == 0:         # There is a plateau at the start
@@ -36,7 +36,7 @@ def findpeaks(y):
                 # The plateau at the start is a valley, so remove it from the list
                 ind = ind[1:]
     
-    if ind[-1] == numpy.size(y):
+    if ind[-1] == np.size(y):
         if dy[-1] == 0:         # There is a plateau at the end
             non_zero_ind = (dy != 0).nonzero()
             if dy[non_zero_ind[0][-1]] < 0: 
@@ -44,8 +44,8 @@ def findpeaks(y):
 
     # Get the values that are at the start of plateaus, or are peaks
     
-    ind_v = numpy.append([0], numpy.diff(ind))
-    ind = numpy.compress(ind_v != 1, ind)   
+    ind_v = np.append([0], np.diff(ind))
+    ind = np.compress(ind_v != 1, ind)   
 
     return ind
 
@@ -53,10 +53,10 @@ def findvalleys(y):
 
     y = -y
 
-    yud = numpy.flipud(y)
-    yud = numpy.array(yud)
-    ind = findpeaks.findpeaks(yud)
-    ind = numpy.atleast_1d(ind)
-    valley = numpy.size(y) - ind - 1
-    valley = numpy.flipud(valley)
+    yud = np.flipud(y)
+    yud = np.array(yud)
+    ind = findpeaks(yud)
+    ind = np.atleast_1d(ind)
+    valley = np.size(y) - ind - 1
+    valley = np.flipud(valley)
     return valley

@@ -9,10 +9,10 @@
 # import supporting modules
 # --------------------------------------------------------
 import os
-from os.path import join, exists
+from os.path import join as pjoin, exists
 import numpy
 import math
-import ascii_read      # read DEM data
+from ascii_read import ElevationData # read DEM data
 import make_path       # generate indices of a data line depending on the direction
 import multiplier_calc # calculate the multipliers for a data line extracted from the dataset
 
@@ -36,17 +36,18 @@ if not exists(mh_data_dir):
 # --------------------------------------------------------
 print'Reading data...\n'
 
-nr = ascii_read.nrows
-nc = ascii_read.ncols
-xll = ascii_read.xllcorner
-yll = ascii_read.yllcorner
-cellsize = ascii_read.cellsize
-data =  ascii_read.data.flatten()
+DEM = ElevationData('../input/dem.asc')
+nr = int(DEM.nrows)
+nc = int(DEM.ncols)
+xll = DEM.xllcorner
+yll = DEM.yllcorner
+cellsize = DEM.cellsize
+data =  DEM.data.flatten()
 
 # --------------------------------------------------------
 # adjust cellsize for diagonal lines
 # --------------------------------------------------------
-data_spacing = ascii_read.cellsize
+data_spacing = DEM.cellsize
 
 if len(direction) == 2:
     data_spacing = data_spacing*math.sqrt(2)
@@ -104,7 +105,7 @@ data = data.conj().transpose()
 # --------------------------------------------------------
 # output unsmoothed data to an ascii file
 # --------------------------------------------------------
-ofn = join(mh_data_dir, 'mh_'+ direction + '.asc')
+ofn = pjoin(mh_data_dir, 'mh_'+ direction + '.asc')
 print 'outputting unsmoothed data to: ', ofn
 
 fid = open(ofn,'w')
@@ -122,7 +123,7 @@ numpy.savetxt(fid, data, fmt ='%4.2f', delimiter = ' ', newline = '\n')
 # output smoothed data to an ascii file
 # --------------------------------------------------------
 
-ofn = join(mh_data_dir,'mh_'+ direction + '_smooth.asc')
+ofn = pjoin(mh_data_dir,'mh_'+ direction + '_smooth.asc')
 print 'outputting smoothed data to: ', ofn
  
 fid = open(ofn,'w')
