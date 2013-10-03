@@ -42,7 +42,7 @@ class TestFindPeaks(unittest.TestCase):
         assert_almost_equal(self.ridge_index, ridge_ind)
 
     def test_findvalleys(self):
-        valley_ind = findvalleys.findvalleys(self.line)
+        valley_ind = findpeaks.findvalleys(self.line)
         assert_almost_equal(self.valley_index, valley_ind)
 
 class TestMultiplierCalc(unittest.TestCase):
