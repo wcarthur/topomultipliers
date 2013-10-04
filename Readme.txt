@@ -23,4 +23,4 @@ It also should be aware that some Python functions have slightly different funct
 V 0.2 - parallel implementation
 Ported to parallel execution - using PyPar for MPI handling. 
 To run in parallel mode:
-    mpirun -np 8 python topomult.py
+    mpirun -np 8 python topomult.py -i <input file> -o <output path>
