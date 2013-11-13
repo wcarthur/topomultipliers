@@ -14,6 +14,7 @@ import numpy as np
 import math
 import logging as log
 import itertools
+import ConfigParser
 from scipy import signal
 
 from ascii_read import ElevationData
@@ -22,7 +23,7 @@ import multiplier_calc
 
 from files import flStartLog
 
-__version__ = '0.2 - parallel implementation'
+__version__ = '0.3 - parallel implementation with configuration file'
 
 
 def work(input_dem, mh_data_dir, directions):
@@ -33,11 +34,14 @@ def work(input_dem, mh_data_dir, directions):
 def topomult(input_dem, mh_data_dir, direction):
     
     if not exists(mh_data_dir):
-        os.makedirs(mh_data_dir)
+        try:
+            os.makedirs(mh_data_dir)
+        except OSError:
+            pass
     
     # read input data using ascii_read. Note: data was flattened to a 
     # single array
-    log.info('Reading data...')
+    log.info('Reading data from {0}'.format(input_dem))
     
     DEM = ElevationData(input_dem)
     nr = int(DEM.nrows)
@@ -186,11 +190,15 @@ def run():
     
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--inputfile", required=True,
+    parser.add_argument("-c", "--config",
+                        help="Configuration file",
+                        type=str)
+    parser.add_argument("-i", "--inputfile",
                         help="Input DEM file (ascii format)",
                         type=str)
-    parser.add_argument("-o", "--output", help="Output path",
-                        type=str, required=True)
+    parser.add_argument("-o", "--output", 
+                        help="Output path",
+                        type=str)
     parser.add_argument("-v", "--verbose", 
                         help=("Verbose output (not available when invoking"
                                 "parallel run)") )
@@ -203,8 +211,23 @@ def run():
     if args.verbose:
         verbose = args.verbose
     else:
-        verbose=True
+        verbose = False
+
+    if args.config:
+        cfg = ConfigParser.ConfigParser()
+        cfg.read(args.config)
+
+        input_file = cfg.get('Input', 'Filename')
+        output_path = cfg.get('Output', 'Path')
+        logfile = cfg.get('Logging', 'LogFile')
+        loglevel = cfg.get('Logging', 'LogLevel')
+        verbose = cfg.get('Logging', 'Verbose')
         
+    if args.inputfile:
+        input_file = args.inputfile
+
+    if args.output:
+        output_path = args.output
     
     attemptParallel()
     if pp.size() > 1 and pp.rank() > 0:
@@ -214,7 +237,7 @@ def run():
     flStartLog(logfile, loglevel, verbose)
     
     pp.barrier()
-    work(args.inputfile, args.output,
+    work(input_file, output_path,
              ['n','s','e','w','ne','nw','se','sw'])
     pp.barrier()
     

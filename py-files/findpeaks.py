@@ -27,6 +27,8 @@ def findpeaks(y):
     ind_a2 = np.array((dy_a2 > 0).nonzero())
     
     ind = np.intersect1d(ind_a1, ind_a2)
+    if len(ind) == 0:
+        return ind
     
     if ind[0] == 0:
         if dy[0] == 0:         # There is a plateau at the start
